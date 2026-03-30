@@ -9,11 +9,12 @@ class Wtop < Formula
 
   def install
     # Build both targets
-    system "swift", "build", "-c", "release"
+    # --disable-sandbox: SPM's sandbox-exec conflicts with Homebrew's build sandbox
+    system "swift", "build", "-c", "release", "--disable-sandbox"
 
     # Find the actual binary output directory
     bin_path = Utils.safe_popen_read(
-      "swift", "build", "-c", "release", "--show-bin-path"
+      "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
     ).strip
 
     wtop_bin = "#{bin_path}/wtop"
