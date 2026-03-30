@@ -9,42 +9,54 @@ class Wtop < Formula
 
   def install
     system "swift", "build", "-c", "release", "--disable-sandbox"
-    plist_path = buildpath/"support/me.abizer.wtop.helper.plist"
-    File.write("/tmp/wtop-debug.txt",
-      "plist_path: #{plist_path}\n" \
-      "exists: #{File.exist?(plist_path)}\n" \
-      "readable: #{File.readable?(plist_path)}\n" \
-      "stat: #{File.stat(plist_path).mode.to_s(8)}\n" \
-      "content_size: #{File.size(plist_path)}\n" \
-      "can_read: #{File.read(plist_path).length}\n"
-    )
 
     bin_path = Utils.safe_popen_read(
       "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
     ).strip
 
-    wtop_bin = "#{bin_path}/wtop"
-    helper_bin = "#{bin_path}/wtop-helper"
+    debug = []
+    debug << "bin_path=#{bin_path}"
+    debug << "wtop_exists=#{File.exist?("#{bin_path}/wtop")}"
+    debug << "helper_exists=#{File.exist?("#{bin_path}/wtop-helper")}"
+    debug << "plist_exists=#{File.exist?(buildpath/"support/me.abizer.wtop.helper.plist")}"
 
-    odie "wtop not found at #{wtop_bin}" unless File.exist?(wtop_bin)
-    odie "wtop-helper not found at #{helper_bin}" unless File.exist?(helper_bin)
+    begin
+      bin.install "#{bin_path}/wtop"
+      debug << "bin.install OK"
+    rescue => e
+      debug << "bin.install FAILED: #{e.class} #{e.message}"
+    end
 
-    bin.install wtop_bin
-    libexec.install helper_bin
+    begin
+      libexec.install "#{bin_path}/wtop-helper"
+      debug << "libexec.install OK"
+    rescue => e
+      debug << "libexec.install FAILED: #{e.class} #{e.message}"
+    end
 
-    # Use buildpath for all source file references (pwd may change after swift build)
-    plist = buildpath/"support/me.abizer.wtop.helper.plist"
-    (etc/"wtop").install plist
+    begin
+      (etc/"wtop").install buildpath/"support/me.abizer.wtop.helper.plist"
+      debug << "etc.install OK"
+    rescue => e
+      debug << "etc.install FAILED: #{e.class} #{e.message}"
+    end
 
-    app_dir = prefix/"wtop.app/Contents"
-    (app_dir/"MacOS").mkpath
-    (app_dir/"Helpers").mkpath
-    (app_dir/"Resources").mkpath
-    cp bin/"wtop", app_dir/"MacOS/wtop"
-    cp libexec/"wtop-helper", app_dir/"Helpers/wtop-helper"
-    cp buildpath/"Info.plist", app_dir/"Info.plist"
-    cp plist, app_dir/"Resources/me.abizer.wtop.helper.plist"
-    system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
+    begin
+      app_dir = prefix/"wtop.app/Contents"
+      (app_dir/"MacOS").mkpath
+      (app_dir/"Helpers").mkpath
+      (app_dir/"Resources").mkpath
+      cp bin/"wtop", app_dir/"MacOS/wtop"
+      cp libexec/"wtop-helper", app_dir/"Helpers/wtop-helper"
+      cp buildpath/"Info.plist", app_dir/"Info.plist"
+      cp buildpath/"support/me.abizer.wtop.helper.plist", app_dir/"Resources/me.abizer.wtop.helper.plist"
+      system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
+      debug << "app bundle OK"
+    rescue => e
+      debug << "app bundle FAILED: #{e.class} #{e.message}"
+    end
+
+    File.write("/tmp/wtop-debug.txt", debug.join("\n") + "\n")
   end
 
   def post_install
