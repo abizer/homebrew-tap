@@ -8,9 +8,14 @@ class Wtop < Formula
   depends_on :macos
 
   def install
-    File.write("/tmp/wtop-debug.txt", "BEFORE: #{Dir.entries('.').sort.join(',')}\n")
     system "swift", "build", "-c", "release", "--disable-sandbox"
-    File.write("/tmp/wtop-debug.txt", File.read("/tmp/wtop-debug.txt") + "AFTER: #{Dir.entries('.').sort.join(',')}\n")
+    plist_path = buildpath/"support/me.abizer.wtop.helper.plist"
+    File.write("/tmp/wtop-debug.txt",
+      "support_dir: #{Dir.entries('support').join(',')}\n" \
+      "plist_path: #{plist_path}\n" \
+      "exists: #{File.exist?(plist_path)}\n" \
+      "buildpath: #{buildpath}\n"
+    )
 
     bin_path = Utils.safe_popen_read(
       "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
