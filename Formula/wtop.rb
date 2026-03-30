@@ -6,7 +6,6 @@ class Wtop < Formula
 
   depends_on :macos
   depends_on arch: :arm64
-  depends_on :xcode => :build  # needs Swift from Xcode or Command Line Tools
 
   def install
     system "swift", "build", "-c", "release", "--disable-sandbox"
