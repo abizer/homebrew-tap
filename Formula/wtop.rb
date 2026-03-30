@@ -10,8 +10,11 @@ class Wtop < Formula
   def install
     system "swift", "build", "-c", "release", "--disable-sandbox"
 
-    bin.install ".build/release/wtop"
-    libexec.install ".build/release/wtop-helper"
+    # swift build output path varies by system — resolve it
+    bin_path = Utils.safe_popen_read("swift", "build", "-c", "release", "--show-bin-path").strip
+
+    bin.install "#{bin_path}/wtop"
+    libexec.install "#{bin_path}/wtop-helper"
     (etc/"wtop").install "Resources/me.abizer.wtop.helper.plist"
 
     # .app bundle for Spotlight/Raycast
@@ -19,8 +22,8 @@ class Wtop < Formula
     (app_dir/"MacOS").mkpath
     (app_dir/"Helpers").mkpath
     (app_dir/"Resources").mkpath
-    cp ".build/release/wtop", app_dir/"MacOS/wtop"
-    cp ".build/release/wtop-helper", app_dir/"Helpers/wtop-helper"
+    cp "#{bin_path}/wtop", app_dir/"MacOS/wtop"
+    cp "#{bin_path}/wtop-helper", app_dir/"Helpers/wtop-helper"
     cp "Info.plist", app_dir/"Info.plist"
     cp "Resources/me.abizer.wtop.helper.plist", app_dir/"Resources/"
     system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
