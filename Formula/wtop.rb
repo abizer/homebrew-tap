@@ -1,14 +1,16 @@
 class Wtop < Formula
   desc "Real-time power monitor for Apple Silicon Macs"
   homepage "https://github.com/abizer/wtop"
-  url "https://github.com/abizer/wtop.git", tag: "v0.2.0"
+  url "https://github.com/abizer/wtop/archive/refs/tags/v0.2.0.tar.gz"
   license "MIT"
 
   depends_on arch: :arm64
   depends_on :macos
 
   def install
+    ohai "BEFORE build: pwd=#{Dir.pwd} entries=#{Dir.entries('.').sort.join(',')}"
     system "swift", "build", "-c", "release", "--disable-sandbox"
+    ohai "AFTER build: pwd=#{Dir.pwd} entries=#{Dir.entries('.').sort.join(',')}"
 
     bin_path = Utils.safe_popen_read(
       "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
