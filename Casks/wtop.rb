@@ -13,6 +13,10 @@ cask "wtop" do
   app "wtop.app"
 
   postflight do
+    # Strip quarantine — app is ad-hoc signed, not notarized
+    system_command "/usr/bin/xattr",
+                   args: ["-r", "-d", "com.apple.quarantine", "#{appdir}/wtop.app"]
+    # Install privileged helper daemon (prompts for password)
     system_command "#{appdir}/wtop.app/Contents/Resources/install-helper.sh",
                    sudo: true
   end
