@@ -10,8 +10,6 @@ class Wtop < Formula
   def install
     system "swift", "build", "-c", "release", "--disable-sandbox"
 
-    ohai "pwd=#{Dir.pwd} support_exists=#{File.exist?('support')} entries=#{Dir.entries('.').sort.join(',')}"
-
     bin_path = Utils.safe_popen_read(
       "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
     ).strip
@@ -19,12 +17,15 @@ class Wtop < Formula
     wtop_bin = "#{bin_path}/wtop"
     helper_bin = "#{bin_path}/wtop-helper"
 
-    odie "wtop binary not found at #{wtop_bin}" unless File.exist?(wtop_bin)
-    odie "wtop-helper binary not found at #{helper_bin}" unless File.exist?(helper_bin)
+    odie "wtop not found at #{wtop_bin}" unless File.exist?(wtop_bin)
+    odie "wtop-helper not found at #{helper_bin}" unless File.exist?(helper_bin)
 
     bin.install wtop_bin
     libexec.install helper_bin
-    (etc/"wtop").install "support/me.abizer.wtop.helper.plist"
+
+    # Use buildpath for all source file references (pwd may change after swift build)
+    plist = buildpath/"support/me.abizer.wtop.helper.plist"
+    (etc/"wtop").install plist
 
     app_dir = prefix/"wtop.app/Contents"
     (app_dir/"MacOS").mkpath
@@ -32,8 +33,8 @@ class Wtop < Formula
     (app_dir/"Resources").mkpath
     cp bin/"wtop", app_dir/"MacOS/wtop"
     cp libexec/"wtop-helper", app_dir/"Helpers/wtop-helper"
-    cp "Info.plist", app_dir/"Info.plist"
-    cp "support/me.abizer.wtop.helper.plist", app_dir/"Resources/"
+    cp buildpath/"Info.plist", app_dir/"Info.plist"
+    cp plist, app_dir/"Resources/me.abizer.wtop.helper.plist"
     system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
   end
 
