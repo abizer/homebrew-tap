@@ -40,27 +40,59 @@ class Wtop < Formula
     mkdir_p apps_dir
     rm_r "#{apps_dir}/wtop.app" if File.exist?("#{apps_dir}/wtop.app")
     ln_sf "#{prefix}/wtop.app", "#{apps_dir}/wtop.app"
+
+    # Install privileged helper if running as root (sudo brew install)
+    if Process.uid.zero?
+      helper_dest = "/Library/PrivilegedHelperTools/me.abizer.wtop.helper"
+      plist_dest = "/Library/LaunchDaemons/me.abizer.wtop.helper.plist"
+
+      mkdir_p "/Library/PrivilegedHelperTools"
+      cp libexec/"wtop-helper", helper_dest
+      chmod 0755, helper_dest
+      cp etc/"wtop/me.abizer.wtop.helper.plist", plist_dest
+
+      begin
+        system "launchctl", "bootout", "system/me.abizer.wtop.helper"
+      rescue ErrorDuringExecution
+        nil
+      end
+      system "launchctl", "bootstrap", "system", plist_dest
+      ohai "Privileged helper installed (on-demand)"
+    end
   end
 
   def caveats
-    <<~EOS
-      wtop is installed as both a CLI tool and a GUI app:
+    if Process.uid.zero?
+      <<~EOS
+        wtop is installed with full privileges:
 
-        CLI:  wtop
-        GUI:  Search "wtop" in Spotlight/Raycast
+          CLI:  wtop
+          GUI:  Search "wtop" in Spotlight/Raycast
 
-      For full system process energy data, install the privileged helper:
+        The privileged helper runs on-demand (only while wtop is open)
+        and auto-exits 30 seconds after the app closes.
 
-        sudo #{libexec}/wtop-helper-install
+        To uninstall the helper:
+          sudo launchctl bootout system/me.abizer.wtop.helper
+          sudo rm -f /Library/PrivilegedHelperTools/me.abizer.wtop.helper
+          sudo rm -f /Library/LaunchDaemons/me.abizer.wtop.helper.plist
+      EOS
+    else
+      <<~EOS
+        wtop is installed as both a CLI tool and a GUI app:
 
-      The helper runs on-demand (only while wtop is open) and auto-exits
-      30 seconds after the app closes.
+          CLI:  wtop
+          GUI:  Search "wtop" in Spotlight/Raycast
 
-      To uninstall the helper:
-        sudo launchctl bootout system/me.abizer.wtop.helper
-        sudo rm -f /Library/PrivilegedHelperTools/me.abizer.wtop.helper
-        sudo rm -f /Library/LaunchDaemons/me.abizer.wtop.helper.plist
-    EOS
+        For full system process energy data, install the privileged helper:
+
+          sudo brew postinstall abizer/tap/wtop
+
+        Or manually:
+
+          sudo #{libexec}/wtop-helper-install
+      EOS
+    end
   end
 
   test do
