@@ -22,7 +22,7 @@ class Wtop < Formula
 
     bin.install wtop_bin
     libexec.install helper_bin
-    (etc/"wtop").install "Resources/me.abizer.wtop.helper.plist"
+    (etc/"wtop").install "support/me.abizer.wtop.helper.plist"
 
     app_dir = prefix/"wtop.app/Contents"
     (app_dir/"MacOS").mkpath
@@ -31,7 +31,7 @@ class Wtop < Formula
     cp bin/"wtop", app_dir/"MacOS/wtop"
     cp libexec/"wtop-helper", app_dir/"Helpers/wtop-helper"
     cp "Info.plist", app_dir/"Info.plist"
-    cp "Resources/me.abizer.wtop.helper.plist", app_dir/"Resources/"
+    cp "support/me.abizer.wtop.helper.plist", app_dir/"Resources/"
     system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
   end
 
