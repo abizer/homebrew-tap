@@ -11,10 +11,12 @@ class Wtop < Formula
     system "swift", "build", "-c", "release", "--disable-sandbox"
     plist_path = buildpath/"support/me.abizer.wtop.helper.plist"
     File.write("/tmp/wtop-debug.txt",
-      "support_dir: #{Dir.entries('support').join(',')}\n" \
       "plist_path: #{plist_path}\n" \
       "exists: #{File.exist?(plist_path)}\n" \
-      "buildpath: #{buildpath}\n"
+      "readable: #{File.readable?(plist_path)}\n" \
+      "stat: #{File.stat(plist_path).mode.to_s(8)}\n" \
+      "content_size: #{File.size(plist_path)}\n" \
+      "can_read: #{File.read(plist_path).length}\n"
     )
 
     bin_path = Utils.safe_popen_read(
