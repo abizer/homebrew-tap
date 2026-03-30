@@ -13,15 +13,13 @@ cask "wtop" do
   app "wtop.app"
 
   postflight do
-    set_permissions "#{appdir}/wtop.app/Contents/Helpers/wtop-helper", "0755"
+    system_command "#{appdir}/wtop.app/Contents/Helpers/install-helper.sh",
+                   sudo: true
   end
 
   caveats <<~EOS
-    For full system process energy data, install the privileged helper:
-      sudo #{appdir}/wtop.app/Contents/Helpers/install-helper.sh
-
-    The helper runs on-demand (only while wtop is open) and auto-exits
-    30 seconds after the app closes.
+    The privileged helper has been installed. It runs on-demand (only
+    while wtop is open) and auto-exits 30 seconds after the app closes.
   EOS
 
   uninstall launchctl: "me.abizer.wtop.helper",
