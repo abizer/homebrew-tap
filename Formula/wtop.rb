@@ -8,9 +8,9 @@ class Wtop < Formula
   depends_on :macos
 
   def install
-    ohai "BEFORE build: pwd=#{Dir.pwd} entries=#{Dir.entries('.').sort.join(',')}"
+    File.write("/tmp/wtop-debug.txt", "BEFORE: #{Dir.entries('.').sort.join(',')}\n")
     system "swift", "build", "-c", "release", "--disable-sandbox"
-    ohai "AFTER build: pwd=#{Dir.pwd} entries=#{Dir.entries('.').sort.join(',')}"
+    File.write("/tmp/wtop-debug.txt", File.read("/tmp/wtop-debug.txt") + "AFTER: #{Dir.entries('.').sort.join(',')}\n")
 
     bin_path = Utils.safe_popen_read(
       "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
