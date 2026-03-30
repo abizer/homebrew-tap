@@ -1,6 +1,6 @@
 cask "wtop" do
   version "0.2.0"
-  sha256 :no_check
+  sha256 "b8d42506e6fe0ad315bd32a981466db2653874a2f24f08e29dc03d479c80114f"
 
   url "https://github.com/abizer/wtop/releases/download/v#{version}/wtop.app.zip"
   name "wtop"
@@ -13,7 +13,7 @@ cask "wtop" do
   app "wtop.app"
 
   postflight do
-    system_command "#{appdir}/wtop.app/Contents/Helpers/install-helper.sh",
+    system_command "#{appdir}/wtop.app/Contents/Resources/install-helper.sh",
                    sudo: true
   end
 
