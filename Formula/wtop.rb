@@ -4,15 +4,12 @@ class Wtop < Formula
   url "https://github.com/abizer/wtop.git", tag: "v0.2.0"
   license "MIT"
 
-  depends_on :macos
   depends_on arch: :arm64
+  depends_on :macos
 
   def install
-    # Build both targets
-    # --disable-sandbox: SPM's sandbox-exec conflicts with Homebrew's build sandbox
     system "swift", "build", "-c", "release", "--disable-sandbox"
 
-    # Find the actual binary output directory
     bin_path = Utils.safe_popen_read(
       "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
     ).strip
@@ -20,7 +17,6 @@ class Wtop < Formula
     wtop_bin = "#{bin_path}/wtop"
     helper_bin = "#{bin_path}/wtop-helper"
 
-    # Verify binaries exist (swift build may silently fail)
     odie "wtop binary not found at #{wtop_bin}" unless File.exist?(wtop_bin)
     odie "wtop-helper binary not found at #{helper_bin}" unless File.exist?(helper_bin)
 
@@ -28,7 +24,6 @@ class Wtop < Formula
     libexec.install helper_bin
     (etc/"wtop").install "Resources/me.abizer.wtop.helper.plist"
 
-    # .app bundle for Spotlight/Raycast
     app_dir = prefix/"wtop.app/Contents"
     (app_dir/"MacOS").mkpath
     (app_dir/"Helpers").mkpath
@@ -50,13 +45,17 @@ class Wtop < Formula
 
     cp etc/"wtop/me.abizer.wtop.helper.plist", plist_dest
 
-    system "launchctl", "bootout", "system/me.abizer.wtop.helper", 2 => "/dev/null" rescue nil
+    begin
+      system "launchctl", "bootout", "system/me.abizer.wtop.helper"
+    rescue ErrorDuringExecution
+      nil
+    end
     system "launchctl", "bootstrap", "system", plist_dest
 
     apps_dir = File.expand_path("~/Applications")
-    FileUtils.mkdir_p(apps_dir)
-    FileUtils.rm_rf("#{apps_dir}/wtop.app")
-    FileUtils.ln_sf("#{prefix}/wtop.app", "#{apps_dir}/wtop.app")
+    mkdir_p apps_dir
+    rm_r "#{apps_dir}/wtop.app" if File.exist?("#{apps_dir}/wtop.app")
+    ln_sf "#{prefix}/wtop.app", "#{apps_dir}/wtop.app"
   end
 
   def caveats
