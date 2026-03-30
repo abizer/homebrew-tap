@@ -14,49 +14,23 @@ class Wtop < Formula
       "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
     ).strip
 
-    debug = []
-    debug << "bin_path=#{bin_path}"
-    debug << "wtop_exists=#{File.exist?("#{bin_path}/wtop")}"
-    debug << "helper_exists=#{File.exist?("#{bin_path}/wtop-helper")}"
-    debug << "plist_exists=#{File.exist?(buildpath/"support/me.abizer.wtop.helper.plist")}"
+    bin.install "#{bin_path}/wtop"
+    libexec.install "#{bin_path}/wtop-helper"
 
-    begin
-      bin.install "#{bin_path}/wtop"
-      debug << "bin.install OK"
-    rescue => e
-      debug << "bin.install FAILED: #{e.class} #{e.message}"
-    end
+    # Build .app bundle BEFORE etc.install (which moves the file)
+    plist_src = buildpath/"support/me.abizer.wtop.helper.plist"
+    app_dir = prefix/"wtop.app/Contents"
+    (app_dir/"MacOS").mkpath
+    (app_dir/"Helpers").mkpath
+    (app_dir/"Resources").mkpath
+    cp bin/"wtop", app_dir/"MacOS/wtop"
+    cp libexec/"wtop-helper", app_dir/"Helpers/wtop-helper"
+    cp buildpath/"Info.plist", app_dir/"Info.plist"
+    cp plist_src, app_dir/"Resources/me.abizer.wtop.helper.plist"
+    system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
 
-    begin
-      libexec.install "#{bin_path}/wtop-helper"
-      debug << "libexec.install OK"
-    rescue => e
-      debug << "libexec.install FAILED: #{e.class} #{e.message}"
-    end
-
-    begin
-      (etc/"wtop").install buildpath/"support/me.abizer.wtop.helper.plist"
-      debug << "etc.install OK"
-    rescue => e
-      debug << "etc.install FAILED: #{e.class} #{e.message}"
-    end
-
-    begin
-      app_dir = prefix/"wtop.app/Contents"
-      (app_dir/"MacOS").mkpath
-      (app_dir/"Helpers").mkpath
-      (app_dir/"Resources").mkpath
-      cp bin/"wtop", app_dir/"MacOS/wtop"
-      cp libexec/"wtop-helper", app_dir/"Helpers/wtop-helper"
-      cp buildpath/"Info.plist", app_dir/"Info.plist"
-      cp buildpath/"support/me.abizer.wtop.helper.plist", app_dir/"Resources/me.abizer.wtop.helper.plist"
-      system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
-      debug << "app bundle OK"
-    rescue => e
-      debug << "app bundle FAILED: #{e.class} #{e.message}"
-    end
-
-    File.write("/tmp/wtop-debug.txt", debug.join("\n") + "\n")
+    # Install plist to etc (this MOVES the file from buildpath)
+    (etc/"wtop").install plist_src
   end
 
   def post_install
