@@ -29,27 +29,13 @@ class Wtop < Formula
     cp plist_src, app_dir/"Resources/me.abizer.wtop.helper.plist"
     system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
 
-    # Install plist to etc (this MOVES the file from buildpath)
+    # Install plist and helper installer to etc/libexec
     (etc/"wtop").install plist_src
+    libexec.install buildpath/"support/install-helper.sh" => "wtop-helper-install"
   end
 
   def post_install
-    helper_dest = "/Library/PrivilegedHelperTools/me.abizer.wtop.helper"
-    plist_dest = "/Library/LaunchDaemons/me.abizer.wtop.helper.plist"
-
-    mkdir_p "/Library/PrivilegedHelperTools"
-    cp libexec/"wtop-helper", helper_dest
-    chmod 0755, helper_dest
-
-    cp etc/"wtop/me.abizer.wtop.helper.plist", plist_dest
-
-    begin
-      system "launchctl", "bootout", "system/me.abizer.wtop.helper"
-    rescue ErrorDuringExecution
-      nil
-    end
-    system "launchctl", "bootstrap", "system", plist_dest
-
+    # Symlink .app to ~/Applications for Spotlight
     apps_dir = File.expand_path("~/Applications")
     mkdir_p apps_dir
     rm_r "#{apps_dir}/wtop.app" if File.exist?("#{apps_dir}/wtop.app")
@@ -63,15 +49,17 @@ class Wtop < Formula
         CLI:  wtop
         GUI:  Search "wtop" in Spotlight/Raycast
 
-      A privileged helper runs on-demand (only while wtop is open)
-      to provide system process energy data. It auto-exits 30s after
-      the app closes.
+      For full system process energy data, install the privileged helper:
 
-      To fully uninstall (remove the helper daemon):
+        sudo #{libexec}/wtop-helper-install
+
+      The helper runs on-demand (only while wtop is open) and auto-exits
+      30 seconds after the app closes.
+
+      To uninstall the helper:
         sudo launchctl bootout system/me.abizer.wtop.helper
         sudo rm -f /Library/PrivilegedHelperTools/me.abizer.wtop.helper
         sudo rm -f /Library/LaunchDaemons/me.abizer.wtop.helper.plist
-        rm -f ~/Applications/wtop.app
     EOS
   end
 
