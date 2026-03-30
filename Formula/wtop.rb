@@ -1,7 +1,7 @@
 class Wtop < Formula
   desc "Real-time power monitor for Apple Silicon Macs"
   homepage "https://github.com/abizer/wtop"
-  url "https://github.com/abizer/wtop.git", tag: "v0.1.0"
+  url "https://github.com/abizer/wtop.git", tag: "v0.2.0"
   license "MIT"
 
   depends_on :macos
