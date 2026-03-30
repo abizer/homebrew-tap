@@ -10,6 +10,8 @@ class Wtop < Formula
   def install
     system "swift", "build", "-c", "release", "--disable-sandbox"
 
+    ohai "pwd=#{Dir.pwd} support_exists=#{File.exist?('support')} entries=#{Dir.entries('.').sort.join(',')}"
+
     bin_path = Utils.safe_popen_read(
       "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
     ).strip
