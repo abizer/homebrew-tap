@@ -8,13 +8,23 @@ class Wtop < Formula
   depends_on arch: :arm64
 
   def install
+    # Build both targets
     system "swift", "build", "-c", "release", "--disable-sandbox"
 
-    # swift build output path varies by system — resolve it
-    bin_path = Utils.safe_popen_read("swift", "build", "-c", "release", "--show-bin-path").strip
+    # Find the actual binary output directory
+    bin_path = Utils.safe_popen_read(
+      "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
+    ).strip
 
-    bin.install "#{bin_path}/wtop"
-    libexec.install "#{bin_path}/wtop-helper"
+    wtop_bin = "#{bin_path}/wtop"
+    helper_bin = "#{bin_path}/wtop-helper"
+
+    # Verify binaries exist (swift build may silently fail)
+    odie "wtop binary not found at #{wtop_bin}" unless File.exist?(wtop_bin)
+    odie "wtop-helper binary not found at #{helper_bin}" unless File.exist?(helper_bin)
+
+    bin.install wtop_bin
+    libexec.install helper_bin
     (etc/"wtop").install "Resources/me.abizer.wtop.helper.plist"
 
     # .app bundle for Spotlight/Raycast
@@ -22,8 +32,8 @@ class Wtop < Formula
     (app_dir/"MacOS").mkpath
     (app_dir/"Helpers").mkpath
     (app_dir/"Resources").mkpath
-    cp "#{bin_path}/wtop", app_dir/"MacOS/wtop"
-    cp "#{bin_path}/wtop-helper", app_dir/"Helpers/wtop-helper"
+    cp bin/"wtop", app_dir/"MacOS/wtop"
+    cp libexec/"wtop-helper", app_dir/"Helpers/wtop-helper"
     cp "Info.plist", app_dir/"Info.plist"
     cp "Resources/me.abizer.wtop.helper.plist", app_dir/"Resources/"
     system "codesign", "--force", "--sign", "-", prefix/"wtop.app"
