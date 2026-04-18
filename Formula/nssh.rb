@@ -1,8 +1,8 @@
 class Nssh < Formula
   desc "Paste images into Claude Code over SSH"
   homepage "https://github.com/abizer/nssh"
-  url "https://github.com/abizer/nssh/archive/refs/tags/v2.0.0.tar.gz"
-  sha256 "90a7fec78575764a3aa8e2454f9e825403c9b92871da67ace8aa891d97607a6c"
+  url "https://github.com/abizer/nssh/archive/refs/tags/v2.0.1.tar.gz"
+  sha256 "4ad5db6849972f5bdbac17ffdc336b0973b4f135576293c65620f5393ba4f903"
   license "MIT"
 
   depends_on "go" => :build
