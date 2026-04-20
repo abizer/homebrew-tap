@@ -2,7 +2,7 @@ cask "wtop" do
   version "0.4.1"
   sha256 "f7b8b71373a9eae33c4557d4c300f874a20b387e001bb2b90aba664e9014cfdb"
 
-  url "https://github.com/abizer/wtop/releases/download/v0.4.1/wtop.app.zip"
+  url "https://github.com/abizer/wtop/releases/download/v#{version}/wtop.app.zip"
   name "wtop"
   desc "Real-time power monitor for Apple Silicon Macs"
   homepage "https://github.com/abizer/wtop"
@@ -21,17 +21,17 @@ cask "wtop" do
                    sudo: true
   end
 
-  caveats <<~EOS
-    The privileged helper has been installed. It runs on-demand (only
-    while wtop is open) and auto-exits 30 seconds after the app closes.
-  EOS
-
   uninstall launchctl: "me.abizer.wtop.helper",
             delete:    "/Library/PrivilegedHelperTools/me.abizer.wtop.helper",
             trash:     "/Library/LaunchDaemons/me.abizer.wtop.helper.plist"
 
   zap trash: [
-    "~/Library/Preferences/me.abizer.wtop.plist",
     "~/Library/Caches/me.abizer.wtop",
+    "~/Library/Preferences/me.abizer.wtop.plist",
   ]
+
+  caveats <<~EOS
+    The privileged helper has been installed. It runs on-demand (only
+    while wtop is open) and auto-exits 30 seconds after the app closes.
+  EOS
 end
