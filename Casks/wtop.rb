@@ -1,8 +1,8 @@
 cask "wtop" do
-  version "0.4.0"
-  sha256 "a9c16c150fad4aca6fd4b3b443f8d5b5df52ace279cd4b3044dcfda6521e1af3"
+  version "0.4.1"
+  sha256 "f7b8b71373a9eae33c4557d4c300f874a20b387e001bb2b90aba664e9014cfdb"
 
-  url "https://github.com/abizer/wtop/releases/download/v#{version}/wtop.app.zip"
+  url "https://github.com/abizer/wtop/releases/download/v0.4.1/wtop.app.zip"
   name "wtop"
   desc "Real-time power monitor for Apple Silicon Macs"
   homepage "https://github.com/abizer/wtop"
