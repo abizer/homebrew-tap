@@ -5,21 +5,21 @@
 class Nssh < Formula
   desc "Paste images into Claude Code over SSH"
   homepage "https://github.com/abizer/nssh"
-  version "2.1.0"
+  version "2.2.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/abizer/nssh/releases/download/v2.1.0/nssh_2.1.0_darwin_amd64.tar.gz"
-      sha256 "56904042b51b935510ba71bb363b21da24de17adf3644a5f2c6184cebe5160ae"
+      url "https://github.com/abizer/nssh/releases/download/v2.2.0/nssh_2.2.0_darwin_amd64.tar.gz"
+      sha256 "637b8261b3514ece26eff572f852bf13013507071b8b7fed0327c6564244357f"
 
       define_method(:install) do
         bin.install "nssh"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/abizer/nssh/releases/download/v2.1.0/nssh_2.1.0_darwin_arm64.tar.gz"
-      sha256 "75d09c63d509e8c66767c940c34b24f86d8458b1d396044f44f4d95c342891a1"
+      url "https://github.com/abizer/nssh/releases/download/v2.2.0/nssh_2.2.0_darwin_arm64.tar.gz"
+      sha256 "49df953bbf3722cf3e282894135c93b2d271c1ea2125c42c0ee658d49a7d4a90"
 
       define_method(:install) do
         bin.install "nssh"
@@ -29,15 +29,15 @@ class Nssh < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/abizer/nssh/releases/download/v2.1.0/nssh_2.1.0_linux_amd64.tar.gz"
-      sha256 "bc3d30dec6087d667d0b01f11dfeef0fb56e12787f22c3362ac579cbeae8098c"
+      url "https://github.com/abizer/nssh/releases/download/v2.2.0/nssh_2.2.0_linux_amd64.tar.gz"
+      sha256 "666c1811b5b6631e330b2d8dfe78a568a98827228934ba678c86866aea2cf360"
       define_method(:install) do
         bin.install "nssh"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/abizer/nssh/releases/download/v2.1.0/nssh_2.1.0_linux_arm64.tar.gz"
-      sha256 "5849647ed447650a15733936d8989c5e6dcf541ab6e984b13268a5a70d554491"
+      url "https://github.com/abizer/nssh/releases/download/v2.2.0/nssh_2.2.0_linux_arm64.tar.gz"
+      sha256 "4f143bbcdfe91ccb5d340cc2c5867dda6c58eee2dc0fc1beae523248ee8430ab"
       define_method(:install) do
         bin.install "nssh"
       end
