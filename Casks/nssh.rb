@@ -39,8 +39,8 @@ cask "nssh" do
   end
 
   zap trash: [
-      "~/.local/state/nssh",
       "~/.config/nssh",
+      "~/.local/state/nssh",
     ]
 
 end
