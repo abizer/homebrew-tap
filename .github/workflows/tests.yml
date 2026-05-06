@@ -46,10 +46,11 @@ jobs:
       # template — see https://github.com/abizer/homebrew-tap/issues/4.
       - name: brew style (hand-written files)
         run: |
-          set -euo pipefail
-          mapfile -t files < <(find Casks Formula -name '*.rb' ! -name 'nssh.rb' 2>/dev/null)
-          if [ "${#files[@]}" -gt 0 ]; then
-            brew style "${files[@]}"
+          set -eu
+          files=$(find Casks Formula -name '*.rb' ! -name 'nssh.rb' 2>/dev/null || true)
+          if [ -n "$files" ]; then
+            # shellcheck disable=SC2086 # paths in this tap don't contain whitespace
+            brew style $files
           fi
       - run: brew readall --aliases --os=all --arch=all abizer/tap
       - run: brew audit --except=installed --tap=abizer/tap
