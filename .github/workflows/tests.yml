@@ -32,7 +32,28 @@ jobs:
 
       - run: brew test-bot --only-cleanup-before
       - run: brew test-bot --only-setup
-      - run: brew test-bot --only-tap-syntax
+
+      # `brew test-bot --only-tap-syntax` runs:
+      #   1. brew style abizer/tap
+      #   2. brew readall --aliases --os=all --arch=all abizer/tap
+      #   3. brew audit --except=installed --tap=abizer/tap
+      # Step (1) fails on Casks/nssh.rb because goreleaser's cask template
+      # emits indentation and trailing-blank patterns that rubocop rejects,
+      # and Homebrew's rubocop config (a) ignores tap-local .rubocop.yml
+      # and (b) forbids inline `# rubocop:disable` directives. So instead,
+      # run style only on hand-written files and let readall+audit cover
+      # the generated cask. Drop this scoping once goreleaser fixes the
+      # template — see https://github.com/abizer/homebrew-tap/issues/4.
+      - name: brew style (hand-written files)
+        run: |
+          set -eu
+          files=$(find Casks Formula -name '*.rb' ! -name 'nssh.rb' 2>/dev/null || true)
+          if [ -n "$files" ]; then
+            # shellcheck disable=SC2086 # paths in this tap don't contain whitespace
+            brew style $files
+          fi
+      - run: brew readall --aliases --os=all --arch=all abizer/tap
+      - run: brew audit --except=installed --tap=abizer/tap
 
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
