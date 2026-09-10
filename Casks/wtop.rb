@@ -7,18 +7,16 @@ cask "wtop" do
   desc "Real-time power monitor for Apple Silicon Macs"
   homepage "https://github.com/abizer/wtop"
 
-  depends_on macos: :sonoma
   depends_on arch: :arm64
+  depends_on macos: :sonoma
 
   app "wtop.app"
 
-  postflight do
+  postflight_steps do
     # Strip quarantine — app is ad-hoc signed, not notarized
-    system_command "/usr/bin/xattr",
-                   args: ["-r", "-d", "com.apple.quarantine", "#{appdir}/wtop.app"]
+    run "/usr/bin/xattr", args: ["-r", "-d", "com.apple.quarantine", "{{appdir}}/wtop.app"]
     # Install privileged helper daemon (prompts for password)
-    system_command "#{appdir}/wtop.app/Contents/Resources/install-helper.sh",
-                   sudo: true
+    run "wtop.app/Contents/Resources/install-helper.sh", base: :appdir, sudo: true
   end
 
   uninstall launchctl: "me.abizer.wtop.helper",
